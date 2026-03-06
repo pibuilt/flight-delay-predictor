@@ -3,7 +3,7 @@ import os
 from preprocess import load_data, basic_cleaning, create_target, select_features
 from features import build_feature_pipeline
 
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, StratifiedKFold, cross_val_score
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import accuracy_score, classification_report
 from sklearn.ensemble import RandomForestClassifier
@@ -64,6 +64,13 @@ def main():
             ("model", model)
         ]
     )
+
+    print("Performing cross-validation...")
+
+    cv_scores = cross_val_score(clf, X_train, y_train, cv=StratifiedKFold(n_splits=5, shuffle=True, random_state=42), scoring="f1", n_jobs=-1)
+
+    print("Cross-validation scores:", cv_scores)
+    print("Mean CV accuracy:", cv_scores.mean())
 
     print("Training Random Forest model...")
 
