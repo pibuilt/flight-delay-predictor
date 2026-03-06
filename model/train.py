@@ -70,7 +70,7 @@ def main():
     cv_scores = cross_val_score(clf, X_train, y_train, cv=StratifiedKFold(n_splits=5, shuffle=True, random_state=42), scoring="f1", n_jobs=-1)
 
     print("Cross-validation scores:", cv_scores)
-    print("Mean CV accuracy:", cv_scores.mean())
+    print("Mean CV F1 score:", cv_scores.mean())
 
     print("Training Random Forest model...")
 
