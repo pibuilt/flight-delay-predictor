@@ -1,5 +1,6 @@
 import os
 import json
+import joblib
 
 import matplotlib
 matplotlib.use("Agg")
@@ -162,6 +163,14 @@ def main():
     with open(metrics_path, "w") as f:
         json.dump(metrics, f, indent=4)
 
+    models_dir = os.path.join(root_dir, "models")
+    os.makedirs(models_dir, exist_ok=True)
+
+    model_path = os.path.join(models_dir, "flight_delay_model.joblib")
+
+    joblib.dump(best_model, model_path)
+
+    print("Model saved to:", model_path)
 
 if __name__ == "__main__":
     main()
