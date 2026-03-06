@@ -3,7 +3,7 @@ import os
 from preprocess import load_data, basic_cleaning, create_target, select_features
 from features import build_feature_pipeline
 
-from sklearn.model_selection import train_test_split, StratifiedKFold, cross_val_score
+from sklearn.model_selection import train_test_split, StratifiedKFold, cross_val_score, RandomizedSearchCV
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import accuracy_score, classification_report
 from sklearn.ensemble import RandomForestClassifier
@@ -58,6 +58,14 @@ def main():
         n_jobs=-1
     )
 
+    param_dist = {
+    "model__n_estimators": [100, 200],
+    "model__max_depth": [10, 15, 20],   
+    "model__min_samples_split": [2, 5, 10],
+    "model__min_samples_leaf": [1, 3, 5],
+    "model__max_features": ["sqrt", "log2"]
+    }
+
     clf = Pipeline(
         steps=[
             ("features", feature_pipeline),
@@ -65,20 +73,29 @@ def main():
         ]
     )
 
-    print("Performing cross-validation...")
+    print("Running hyperparameter tuning...")
 
-    cv_scores = cross_val_score(clf, X_train, y_train, cv=StratifiedKFold(n_splits=5, shuffle=True, random_state=42), scoring="f1", n_jobs=-1)
+    randomized_search = RandomizedSearchCV(
+        clf,
+        param_distributions=param_dist,
+        n_iter=17,
+        cv=StratifiedKFold(n_splits=3, shuffle=True, random_state=42),
+        verbose=2,
+        scoring="f1",
+        n_jobs=-1,
+        random_state=42
+    )
 
-    print("Cross-validation scores:", cv_scores)
-    print("Mean CV F1 score:", cv_scores.mean())
+    randomized_search.fit(X_train, y_train)
 
-    print("Training Random Forest model...")
+    print("Best parameters:", randomized_search.best_params_)
+    print("Best cross-validation score:", randomized_search.best_score_)
 
-    clf.fit(X_train, y_train)
+    best_model = randomized_search.best_estimator_
 
     print("Generating predictions...")
 
-    predictions = clf.predict(X_test)
+    predictions = best_model.predict(X_test)
 
     print("Accuracy:", accuracy_score(y_test, predictions))
 
