@@ -516,7 +516,7 @@ function App() {
               disabled={loading}
               className="mt-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-semibold py-2.5 rounded-lg transition text-sm"
             >
-              {loading ? "Predicting..." : "Predict Delay"}
+              {loading ? "Predicting..." : "Predict Delay or Not"}
             </button>
           </form>
         </div>
