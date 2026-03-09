@@ -5,9 +5,12 @@ from backend.app.models.flight import FlightRequest as FlightData
 
 app = FastAPI(title="Flight Delay Prediction API")
 
+# CORS is set to allow all origins because the backend is not publicly
+# reachable (no port mapping in docker-compose.yml). All browser requests
+# go through nginx on the frontend container, which proxies them internally.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )

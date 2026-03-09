@@ -1,22 +1,26 @@
 version: "3.9"
 
+# EC2 free-tier deployment
+# Both containers run on the same instance.
+# The backend is NOT exposed publicly — nginx on the frontend container
+# proxies /predict and /health to the backend over Docker's internal network.
+# Only port 3000 needs to be open in the EC2 Security Group.
+
 services:
   backend:
     build:
       context: .
       dockerfile: Dockerfile.backend
     container_name: flight-delay-backend
-    ports:
-      - "8000:8000"
+    # No ports: section — backend is internal only.
+    # Docker Compose creates a shared network; frontend reaches it at http://backend:8000
 
   frontend:
     build:
       context: .
       dockerfile: Dockerfile.frontend
-      args:
-        - REACT_APP_API_URL=http://localhost:8000
     container_name: flight-delay-frontend
     ports:
-      - "3000:80"
+      - "3000:80" # Only public-facing port needed
     depends_on:
       - backend

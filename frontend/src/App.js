@@ -1,7 +1,11 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
+// API_URL is intentionally empty string in production.
+// Requests like `${API_URL}/predict` become same-origin calls (e.g. http://ec2-host:3000/predict),
+// which nginx then proxies internally to the backend container.
+// Set REACT_APP_API_URL at build time only when running locally against a separate backend.
+const API_URL = process.env.REACT_APP_API_URL || "";
 
 const AIRLINES = [
   "AA",
