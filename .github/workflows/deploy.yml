@@ -1,12 +1,16 @@
 name: Deploy to EC2
 
 on:
-  push:
+  workflow_run:
+    workflows: ["CI Pipeline"] # Must match the 'name:' field in ci.yml exactly
+    types: [completed]
     branches: [main]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    # Only deploy if CI passed — never deploy on a failing build
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - name: Deploy to EC2 via SSH
