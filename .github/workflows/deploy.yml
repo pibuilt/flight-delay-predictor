@@ -32,10 +32,13 @@ jobs:
 
       - name: Update DuckDNS with current EC2 IP
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          DUCKDNS_TOKEN: ${{ secrets.DUCKDNS_TOKEN }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
+          envs: DUCKDNS_TOKEN
           script: |
-            CURRENT_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
-            curl -s "https://www.duckdns.org/update?domains=flight-predictor-pibuilt&token=${{ secrets.DUCKDNS_TOKEN }}&ip=${CURRENT_IP}"
+            CURRENT_IP=$(curl -s https://checkip.amazonaws.com)
+            curl -s "https://www.duckdns.org/update?domains=flight-predictor-pibuilt&token=${DUCKDNS_TOKEN}&ip=${CURRENT_IP}"
