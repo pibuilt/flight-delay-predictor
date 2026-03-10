@@ -1,9 +1,17 @@
-from fastapi import FastAPI, HTTPException
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from backend.app.services.prediction_service import predict_flight_delay
+from backend.app.services.prediction_service import load_model, predict_flight_delay
 from backend.app.models.flight import FlightRequest as FlightData
 
-app = FastAPI(title="Flight Delay Prediction API")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    app.state.model = load_model()
+    yield
+
+
+app = FastAPI(title="Flight Delay Prediction API", lifespan=lifespan)
 
 # CORS is set to allow all origins because the backend is not publicly
 # reachable (no port mapping in docker-compose.yml). All browser requests
@@ -20,9 +28,9 @@ def health_check():
     return {"status": "healthy"}
 
 @app.post("/predict")
-def predict(input_data: FlightData):
+def predict(input_data: FlightData, request: Request):
     try:
-        result = predict_flight_delay(input_data.model_dump())
+        result = predict_flight_delay(input_data.model_dump(), request.app.state.model)
         return {"success": True, "data": result}
     except Exception:
         raise HTTPException(status_code=500, detail="Prediction failed")
