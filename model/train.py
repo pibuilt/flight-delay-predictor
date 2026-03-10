@@ -143,10 +143,17 @@ def main():
 
     model = best_model.named_steps["model"]
     importances = model.feature_importances_
+    feature_names = best_model.named_steps["features"].get_feature_names_out()
 
-    plt.figure(figsize=(10,6))
-    plt.hist(importances, bins=30)
-    plt.title("Feature Importance Distribution")
+    indices = importances.argsort()[::-1]
+    top_n = min(20, len(indices))
+
+    plt.figure(figsize=(10, 8))
+    plt.barh(range(top_n), importances[indices[:top_n]][::-1])
+    plt.yticks(range(top_n), [feature_names[i] for i in indices[:top_n]][::-1])
+    plt.xlabel("Importance")
+    plt.title("Top Feature Importances")
+    plt.tight_layout()
 
     fi_path = os.path.join(reports_dir, "feature_importance.png")
     plt.savefig(fi_path)
